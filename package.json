@@ -16,9 +16,16 @@
     "graphql": "16.9.0"
   },
   "devDependencies": {
+    "@eslint/js": "9.9.1",
     "@types/node": "22.5.3",
+    "eslint": "9.9.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "globals": "15.9.0",
     "nodemon": "3.1.4",
+    "prettier": "3.3.3",
     "ts-node": "10.9.2",
-    "typescript": "5.5.4"
+    "typescript": "5.5.4",
+    "typescript-eslint": "8.4.0"
   }
 }
