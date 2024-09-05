@@ -27,7 +27,13 @@ This is a project for learning the basic concepts of backend application develop
      npm install
      ```
 
-3. **Run project**:
+3. **Run docker**:
+     ```bash
+     docker compose up -d
+     ```
+   
+
+4. **Run project**:
      ```bash
      npm start
      ```
