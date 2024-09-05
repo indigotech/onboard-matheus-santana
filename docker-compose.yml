@@ -1,6 +1,6 @@
 services:
   localdb:
-    image: postgres:15.1 
+    image: postgres:15.1
     ports:
       - "5432:5432"
     volumes:
@@ -20,4 +20,3 @@ services:
       - POSTGRES_USER=admin_test
       - POSTGRES_PASSWORD=root_test
       - POSTGRES_DB=user_test
-  
