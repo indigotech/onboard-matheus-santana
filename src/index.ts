@@ -1,5 +1,8 @@
 import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer } from "@apollo/server/standalone";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 const typeDefs = `#graphql
   type Query {
@@ -27,14 +30,6 @@ const typeDefs = `#graphql
   
 `;
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  password: string;
-  birthDate: string;
-}
-
 interface UserInput {
   name: string;
   email: string;
@@ -42,21 +37,15 @@ interface UserInput {
   birthDate: string;
 }
 
-const users: User[] = [];
-let idIncrement: number = 0;
-
 const resolvers = {
   Query: {
     hello: () => "Hello world!",
   },
   Mutation: {
-    createUser: (_: unknown, args: { data: UserInput }): User => {
-      const id = ++idIncrement;
-
-      const user = { ...args.data, id: id };
-
-      users.push(user);
-      return user;
+    createUser: async (_: unknown, args: { data: UserInput }) => {
+      return prisma.user.create({
+        data: { ...args.data },
+      });
     },
   },
 };
