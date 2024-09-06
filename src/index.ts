@@ -7,22 +7,22 @@ const typeDefs = `#graphql
   }
 
   input UserInput{
-    name: String
-    email: String
-    password: String
-    birthDate: String
+    name: String!
+    email: String!
+    password: String!
+    birthDate: String!
   }
 
   type User{
-    id: Int
-    name: String
-    email: String
-    password : String
-    birthDate: String
+    id: Int!
+    name: String!
+    email: String!
+    password : String!
+    birthDate: String!
   }
 
   type Mutation {
-    createUser(data: UserInput) : User
+    createUser(data: UserInput!) : User
   }
   
 `;
