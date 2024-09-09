@@ -1,7 +1,7 @@
 import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer } from "@apollo/server/standalone";
 import { PrismaClient } from "@prisma/client";
-import { isEmailUnique, isPasswordValid } from "./utils/validators.js";
+import { checkEmailUnique, checkPasswordValid } from "./utils/validators.js";
 
 export const prisma = new PrismaClient();
 
@@ -49,9 +49,9 @@ const resolvers = {
         return prisma.user.create({
           data: {
             name: name,
-            email: await isEmailUnique(email),
+            email: await checkEmailUnique(email),
             birthDate: birthDate,
-            password: isPasswordValid(password),
+            password: checkPasswordValid(password),
           },
         });
       } catch (err) {
