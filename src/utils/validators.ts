@@ -1,4 +1,4 @@
-import { prisma } from "../index.js";
+import { prisma } from "../server.js";
 
 const PASSWORD_VALID_REGEX = new RegExp(
   /^(?=.*[A-Z])(?=.*[0-9])(?=.*[a-z]).{6,}$/,
