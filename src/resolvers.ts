@@ -15,24 +15,20 @@ export const resolvers = {
   },
   Mutation: {
     createUser: async (_: unknown, args: { data: UserInput }) => {
-      try {
-        const { name, email, birthDate, password }: UserInput = args.data;
-        const generatedSalt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(
-          checkPasswordValid(password),
-          generatedSalt,
-        );
-        return prisma.user.create({
-          data: {
-            name: name,
-            email: await checkEmailUnique(email),
-            birthDate: birthDate,
-            password: hashedPassword,
-          },
-        });
-      } catch (err) {
-        return err;
-      }
+      const { name, email, birthDate, password }: UserInput = args.data;
+      const generatedSalt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(
+        checkPasswordValid(password),
+        generatedSalt,
+      );
+      return prisma.user.create({
+        data: {
+          name: name,
+          email: await checkEmailUnique(email),
+          birthDate: birthDate,
+          password: hashedPassword,
+        },
+      });
     },
   },
 };
