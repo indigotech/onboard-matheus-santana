@@ -47,17 +47,17 @@ const resolvers = {
     createUser: async (_: unknown, args: { data: UserInput }) => {
       try {
         const { name, email, birthDate, password }: UserInput = args.data;
-        const genSalt = await bcrypt.genSalt(10);
-        const secPass = await bcrypt.hash(
+        const generatedSalt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(
           checkPasswordValid(password),
-          genSalt,
+          generatedSalt,
         );
         return prisma.user.create({
           data: {
             name: name,
             email: await checkEmailUnique(email),
             birthDate: birthDate,
-            password: secPass,
+            password: hashedPassword,
           },
         });
       } catch (err) {
