@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "compile": "tsc",
+    "test": "npm run compile && mocha dist/test/index.js",
     "dev": "nodemon",
     "start": "npm run compile && node dist/index.js"
   },
@@ -20,15 +21,17 @@
   },
   "devDependencies": {
     "@eslint/js": "9.9.1",
-    "@types/node": "22.5.3",
     "@types/bcrypt": "5.0.2",
+    "@types/mocha": "10.0.7",
+    "@types/node": "22.5.3",
+    "axios": "1.7.7",
     "eslint": "9.9.1",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-prettier": "5.2.1",
     "globals": "15.9.0",
+    "mocha": "10.7.3",
     "nodemon": "3.1.4",
     "prettier": "3.3.3",
-    "ts-node": "10.9.2",
     "typescript": "5.5.4",
     "typescript-eslint": "8.4.0"
   }
