@@ -22,9 +22,11 @@
   "devDependencies": {
     "@eslint/js": "9.9.1",
     "@types/bcrypt": "5.0.2",
+    "@types/chai": "^4.3.19",
     "@types/mocha": "10.0.7",
     "@types/node": "22.5.3",
     "axios": "1.7.7",
+    "chai": "5.1.1",
     "eslint": "9.9.1",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-prettier": "5.2.1",
