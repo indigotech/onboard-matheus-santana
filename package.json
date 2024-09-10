@@ -5,8 +5,8 @@
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "compile": "tsc",
-    "test": "npm run compile && mocha dist/test/index.js",
+    "compile": "rm -rf dist/ && tsc",
+    "test": "mocha test/index.ts",
     "dev": "nodemon",
     "start": "npm run compile && node dist/index.js"
   },
@@ -22,7 +22,7 @@
   "devDependencies": {
     "@eslint/js": "9.9.1",
     "@types/bcrypt": "5.0.2",
-    "@types/chai": "^4.3.19",
+    "@types/chai": "4.3.19",
     "@types/mocha": "10.0.7",
     "@types/node": "22.5.3",
     "axios": "1.7.7",
@@ -34,6 +34,7 @@
     "mocha": "10.7.3",
     "nodemon": "3.1.4",
     "prettier": "3.3.3",
+    "tsx": "4.19.0",
     "typescript": "5.5.4",
     "typescript-eslint": "8.4.0"
   }
