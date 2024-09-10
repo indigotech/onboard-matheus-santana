@@ -2,6 +2,7 @@ import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer } from "@apollo/server/standalone";
 import { PrismaClient } from "@prisma/client";
 import { checkEmailUnique, checkPasswordValid } from "./utils/validators.js";
+import * as bcrypt from "bcrypt";
 
 export const prisma = new PrismaClient();
 
@@ -44,14 +45,19 @@ const resolvers = {
   },
   Mutation: {
     createUser: async (_: unknown, args: { data: UserInput }) => {
-      const { name, email, birthDate, password }: UserInput = args.data;
       try {
+        const { name, email, birthDate, password }: UserInput = args.data;
+        const generatedSalt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(
+          checkPasswordValid(password),
+          generatedSalt,
+        );
         return prisma.user.create({
           data: {
             name: name,
             email: await checkEmailUnique(email),
             birthDate: birthDate,
-            password: checkPasswordValid(password),
+            password: hashedPassword,
           },
         });
       } catch (err) {
