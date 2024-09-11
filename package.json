@@ -8,7 +8,7 @@
     "migrate:postgres": "dotenv -e test.env -- npx prisma migrate deploy",
     "compile": "rm -rf dist/ && tsc",
     "test": "dotenv -e test.env -- mocha test/index.ts",
-    "dev": "dotenv -e test.env -- nodemon",
+    "dev": "dotenv -e .env -- nodemon",
     "start": "npm run compile && dotenv -e .env -- node dist/index.js"
   },
   "author": "Matheus Gonçalves Sant'Ana",
