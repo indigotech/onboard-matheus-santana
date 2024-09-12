@@ -1,3 +1,4 @@
+import { expect } from "chai";
 import { before, describe, it } from "node:test";
 import axios from "axios";
 import { startServer } from "../src/server.js";
@@ -22,6 +23,6 @@ describe("Hello-world-graphql", () => {
   });
   it("Should return Hello world!", async () => {
     const response = await axios.post(endpoint, graphqlQuery);
-    console.log(response.data.data.hello);
+    expect(response.data.data.hello).to.be.eq("Hello world!");
   });
 });
