@@ -2,7 +2,7 @@ import { prisma } from "./prisma.js";
 import { checkEmailUnique, checkPasswordValid } from "./utils/validators.js";
 import * as bcrypt from "bcrypt";
 
-interface UserInput {
+export interface UserInput {
   name: string;
   email: string;
   password: string;
