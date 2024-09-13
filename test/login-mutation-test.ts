@@ -4,6 +4,7 @@ import { endpoint } from "./index.js";
 import { LoginInput, UserInput } from "../src/resolvers.js";
 import { prisma } from "../src/prisma.js";
 import { User } from "@prisma/client";
+import { genSalt, hash } from "bcrypt";
 
 describe("Login-mutation-test", () => {
   const userInput: UserInput = {
@@ -13,7 +14,7 @@ describe("Login-mutation-test", () => {
     birthDate: "07-12-2003",
   };
 
-  const graphqlMutatitonGenereted = (email: string, password: string) => {
+  const buildLoginMutationInput = (email: string, password: string) => {
     const loginInput: LoginInput = {
       email: email,
       password: password,
@@ -40,39 +41,27 @@ describe("Login-mutation-test", () => {
     return graphqlMutationLogin;
   };
 
-  const graphqlMutationCreateUser = {
-    query: `mutation Mutation($data: UserInput!) {
-        createUser(data: $data) {
-          birthDate
-          email
-          id
-          name
-          password
-        }
-      }`,
-    variables: {
-      data: userInput,
-    },
-  };
-
   let userResponse: User;
 
   beforeEach(async () => {
-    userResponse = (await axios.post(endpoint, graphqlMutationCreateUser)).data
-      .data.createUser;
+    const generatedSalt = await genSalt(10);
+    const hashedPassword = await hash(userInput.password, generatedSalt);
+    userInput.password = hashedPassword;
+    userResponse = await prisma.user.create({
+      data: userInput,
+    });
   });
 
   it("Should return a user information and token", async () => {
+    userInput.password = "Matheus12345";
     const response = await axios.post(
       endpoint,
-      graphqlMutatitonGenereted(userInput.email, userInput.password),
+      buildLoginMutationInput(userInput.email, userInput.password),
     );
-
     const loginResponseExpected = {
       user: userResponse,
       token: " ",
     };
-
     expect(response.data.data.login).to.be.deep.eq(loginResponseExpected);
   });
 
@@ -80,7 +69,7 @@ describe("Login-mutation-test", () => {
     const wrongEmail = "teste.email.errado@taqtile.com";
     const response = await axios.post(
       endpoint,
-      graphqlMutatitonGenereted(wrongEmail, userInput.password),
+      buildLoginMutationInput(wrongEmail, userInput.password),
     );
 
     const loginResponseExpected = {
@@ -97,7 +86,7 @@ describe("Login-mutation-test", () => {
     const wrongPassword = "1234";
     const response = await axios.post(
       endpoint,
-      graphqlMutatitonGenereted(userInput.email, wrongPassword),
+      buildLoginMutationInput(userInput.email, wrongPassword),
     );
 
     const loginResponseExpected = {
