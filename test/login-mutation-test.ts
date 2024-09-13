@@ -1,7 +1,12 @@
 import axios from "axios";
 import { expect } from "chai";
 import { endpoint } from "./index.js";
-import { LoginInput, UserInput } from "../src/resolvers.js";
+import {
+  LoginInput,
+  TIME_EXPIRETION_DEFAULT,
+  TIME_EXPIRETION_REMEBER_ME,
+  UserInput,
+} from "../src/resolvers.js";
 import { prisma } from "../src/prisma.js";
 import { User } from "@prisma/client";
 import { genSalt, hash } from "bcrypt";
@@ -15,10 +20,15 @@ describe("Login-mutation-test", () => {
     birthDate: "07-12-2003",
   };
 
-  const buildLoginMutationInput = (email: string, password: string) => {
+  const buildLoginMutationInput = (
+    email: string,
+    password: string,
+    rememberMe?: boolean,
+  ) => {
     const loginInput: LoginInput = {
-      email: email,
-      password: password,
+      email,
+      password,
+      rememberMe,
     };
 
     const graphqlMutationLogin = {
@@ -53,7 +63,7 @@ describe("Login-mutation-test", () => {
     });
   });
 
-  it("Should return a user information and token", async () => {
+  it("Should return a user information and token with duration 1 day", async () => {
     userInput.password = "Matheus12345";
     const response = await axios.post(
       endpoint,
@@ -61,11 +71,29 @@ describe("Login-mutation-test", () => {
     );
     const token = jwt.sign(
       { userId: userResponse.id },
-      process.env.TOKEN_JWT as Secret | "",
+      (process.env.TOKEN_JWT as Secret) ?? "",
+      { expiresIn: TIME_EXPIRETION_DEFAULT },
     );
     const loginResponseExpected = {
       user: userResponse,
-      token: token,
+      token,
+    };
+    expect(response.data.data.login).to.be.deep.eq(loginResponseExpected);
+  });
+  it("Should return a user information and token with duration 7 day", async () => {
+    userInput.password = "Matheus12345";
+    const response = await axios.post(
+      endpoint,
+      buildLoginMutationInput(userInput.email, userInput.password, true),
+    );
+    const token = jwt.sign(
+      { userId: userResponse.id },
+      (process.env.TOKEN_JWT as Secret) ?? "",
+      { expiresIn: TIME_EXPIRETION_REMEBER_ME },
+    );
+    const loginResponseExpected = {
+      user: userResponse,
+      token,
     };
     expect(response.data.data.login).to.be.deep.eq(loginResponseExpected);
   });
@@ -74,7 +102,7 @@ describe("Login-mutation-test", () => {
     const wrongEmail = "teste.email.errado@taqtile.com";
     const response = await axios.post(
       endpoint,
-      buildLoginMutationInput(wrongEmail, userInput.password),
+      buildLoginMutationInput(wrongEmail, userInput.password, false),
     );
 
     const loginResponseExpected = {
