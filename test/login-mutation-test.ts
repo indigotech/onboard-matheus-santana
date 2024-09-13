@@ -5,6 +5,7 @@ import { LoginInput, UserInput } from "../src/resolvers.js";
 import { prisma } from "../src/prisma.js";
 import { User } from "@prisma/client";
 import { genSalt, hash } from "bcrypt";
+import jwt, { Secret } from "jsonwebtoken";
 
 describe("Login-mutation-test", () => {
   const userInput: UserInput = {
@@ -58,9 +59,13 @@ describe("Login-mutation-test", () => {
       endpoint,
       buildLoginMutationInput(userInput.email, userInput.password),
     );
+    const token = jwt.sign(
+      { userId: userResponse.id },
+      process.env.TOKEN_JWT as Secret | "",
+    );
     const loginResponseExpected = {
       user: userResponse,
-      token: " ",
+      token: token,
     };
     expect(response.data.data.login).to.be.deep.eq(loginResponseExpected);
   });

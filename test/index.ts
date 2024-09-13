@@ -1,7 +1,7 @@
 import { startServer } from "../src/server.js";
 import { ApolloServer, BaseContext } from "@apollo/server";
 
-export const endpoint = "http://localhost:4000/";
+export const endpoint = `http://localhost:${process.env.PORT}`;
 
 let serverApollo: ApolloServer<BaseContext>;
 

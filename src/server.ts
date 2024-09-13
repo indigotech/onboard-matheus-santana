@@ -11,7 +11,7 @@ export async function startServer(): Promise<ApolloServer<BaseContext>> {
     formatError,
   });
   const { url } = await startStandaloneServer(server, {
-    listen: { port: 4000 },
+    listen: { port: parseInt(process.env.PORT) },
   });
   console.log(`🚀  Server ready at: ${url}`);
   return server;
