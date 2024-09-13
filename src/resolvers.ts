@@ -37,22 +37,20 @@ export const resolvers = {
       });
     },
     login: async (_: unknown, args: { data: LoginInput }) => {
-      const mockedLogin = {
-        user: {
-          id: 15,
-          name: "Matheus",
-          email: "matheus.12345@taqtile.com",
-          password: "Taqtile12345",
-          birthDate: "07/12/2003",
-        },
-        token: "adasafdsfsfdsfewwefwef",
-      };
       const login: LoginInput = args.data;
+      const user = await prisma.user.findUnique({
+        where: {
+          email: login.email,
+        },
+      });
       if (
-        mockedLogin.user.email === login.email &&
-        mockedLogin.user.password === mockedLogin.user.password
+        user != null &&
+        (await bcrypt.compare(login.password, user.password))
       ) {
-        return mockedLogin;
+        return {
+          token: " ",
+          user: user,
+        };
       }
       throw new CustomError(
         "Email e/ou senha inválidos",
