@@ -1,3 +1,4 @@
+import { CustomError } from "../error.js";
 import { prisma } from "../prisma.js";
 
 const PASSWORD_VALID_REGEX = new RegExp(
@@ -7,7 +8,11 @@ const PASSWORD_VALID_REGEX = new RegExp(
 
 export function checkPasswordValid(password: string): string {
   if (!PASSWORD_VALID_REGEX.test(password)) {
-    throw new Error("Password invalid");
+    throw new CustomError(
+      "Senha invalida",
+      400,
+      "A senha deve conter no mínimo 1 letra maiúscula, 1 letra minúscula, 1 numéro e 6 caracteres de tamanho",
+    );
   }
   return password;
 }
@@ -19,7 +24,11 @@ export async function checkEmailUnique(email: string): Promise<string> {
     },
   });
   if (user != null) {
-    throw new Error("Email already exist");
+    throw new CustomError(
+      "O email já existe",
+      400,
+      "O email na qual está tentando ser cadastrado já existe na base de dados",
+    );
   }
   return email;
 }
