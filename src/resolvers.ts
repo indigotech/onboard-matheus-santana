@@ -17,9 +17,6 @@ export interface LoginInput {
   rememberMe?: boolean | null;
 }
 
-export const TIME_EXPIRETION_DEFAULT = "1d";
-export const TIME_EXPIRETION_REMEBER_ME = "7d";
-
 export const resolvers = {
   Query: {
     hello: () => "Hello world!",
@@ -53,8 +50,8 @@ export const resolvers = {
         (await bcrypt.compare(login.password, user.password))
       ) {
         const timeExpiretion = login.rememberMe
-          ? TIME_EXPIRETION_REMEBER_ME
-          : TIME_EXPIRETION_DEFAULT;
+          ? process.env.TIME_EXPIRATION_REMEBER_ME
+          : process.env.TIME_EXPIRATION_DEFAULT;
         const token = jwt.sign({ userId: user.id }, process.env.TOKEN_JWT, {
           expiresIn: timeExpiretion,
         });
