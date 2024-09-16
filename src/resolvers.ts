@@ -2,6 +2,7 @@ import { CustomError } from "./error.js";
 import { prisma } from "./prisma.js";
 import { checkEmailUnique, checkPasswordValid } from "./utils/validators.js";
 import * as bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 export interface UserInput {
   name: string;
@@ -47,8 +48,9 @@ export const resolvers = {
         user != null &&
         (await bcrypt.compare(login.password, user.password))
       ) {
+        const token = jwt.sign({ userId: user.id }, process.env.TOKEN_JWT);
         return {
-          token: " ",
+          token: token,
           user: user,
         };
       }
