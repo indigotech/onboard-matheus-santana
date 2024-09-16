@@ -1,39 +1,109 @@
 import axios from "axios";
 import { expect } from "chai";
 import { endpoint } from "./index.js";
-import { LoginInput } from "../src/resolvers.js";
+import { LoginInput, UserInput } from "../src/resolvers.js";
+import { prisma } from "../src/prisma.js";
+import { User } from "@prisma/client";
+import { genSalt, hash } from "bcrypt";
 
 describe("Login-mutation-test", () => {
-  const user: LoginInput = {
+  const userInput: UserInput = {
+    name: "Matheus Gonçalves",
     email: "matheus.12345@taqtile.com",
-    password: "Taqtile12345",
+    password: "Matheus12345",
+    birthDate: "07-12-2003",
   };
-  const graphqlQueryMutation = {
-    query: `mutation Login($data: LoginInput!) {
-        login(data: $data) {
-            token
-            user {
-                email
-                birthDate
-                id
-                password
-                name
-            }
-        }
+
+  const buildLoginMutationInput = (email: string, password: string) => {
+    const loginInput: LoginInput = {
+      email: email,
+      password: password,
+    };
+
+    const graphqlMutationLogin = {
+      query: `mutation Login($data: LoginInput!) {
+    login(data: $data) {
+      user {
+        birthDate
+        email
+        id
+        name
+        password
+      }
+      token
+      }
     }`,
-    variables: {
-      data: user,
-    },
+      variables: {
+        data: loginInput,
+      },
+    };
+
+    return graphqlMutationLogin;
   };
-  it("Should return a user informations and token", async () => {
-    const response = await axios.post(endpoint, graphqlQueryMutation);
-    expect(response.data.data.login.token).to.be.eq("adasafdsfsfdsfewwefwef");
-    expect(response.data.data.login.user.name).to.be.eq("Matheus");
-    expect(response.data.data.login.user.email).to.be.eq(
-      "matheus.12345@taqtile.com",
+
+  let userResponse: User;
+
+  beforeEach(async () => {
+    const generatedSalt = await genSalt(10);
+    const hashedPassword = await hash(userInput.password, generatedSalt);
+    userInput.password = hashedPassword;
+    userResponse = await prisma.user.create({
+      data: userInput,
+    });
+  });
+
+  it("Should return a user information and token", async () => {
+    userInput.password = "Matheus12345";
+    const response = await axios.post(
+      endpoint,
+      buildLoginMutationInput(userInput.email, userInput.password),
     );
-    expect(response.data.data.login.user.password).to.be.eq("Taqtile12345");
-    expect(response.data.data.login.user.birthDate).to.be.eq("07/12/2003");
-    expect(response.data.data.login.user.id).to.be.eq(15);
+    const loginResponseExpected = {
+      user: userResponse,
+      token: " ",
+    };
+    expect(response.data.data.login).to.be.deep.eq(loginResponseExpected);
+  });
+
+  it("Should return a error of login (wrong Email)", async () => {
+    const wrongEmail = "teste.email.errado@taqtile.com";
+    const response = await axios.post(
+      endpoint,
+      buildLoginMutationInput(wrongEmail, userInput.password),
+    );
+
+    const loginResponseExpected = {
+      message: "Email e/ou senha inválidos",
+      code: 400,
+      additionalInfo:
+        "Email e/ou senha inseridos estã0 inválido. Por favor, tente novamente",
+    };
+
+    expect(response.data.errors[0]).to.be.deep.eq(loginResponseExpected);
+  });
+
+  it("Should return a error of login (Wrong password)", async () => {
+    const wrongPassword = "1234";
+    const response = await axios.post(
+      endpoint,
+      buildLoginMutationInput(userInput.email, wrongPassword),
+    );
+
+    const loginResponseExpected = {
+      message: "Email e/ou senha inválidos",
+      code: 400,
+      additionalInfo:
+        "Email e/ou senha inseridos estã0 inválido. Por favor, tente novamente",
+    };
+
+    expect(response.data.errors[0]).to.be.deep.eq(loginResponseExpected);
+  });
+
+  afterEach(async () => {
+    await prisma.user.delete({
+      where: {
+        email: userInput.email,
+      },
+    });
   });
 });
