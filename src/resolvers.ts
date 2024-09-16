@@ -1,3 +1,4 @@
+import { User } from "@prisma/client";
 import { CustomError } from "./error.js";
 import { prisma } from "./prisma.js";
 import { ContextAuthentication } from "./server.js";
@@ -21,6 +22,31 @@ export interface LoginInput {
 export const resolvers = {
   Query: {
     hello: () => "Hello world!",
+    user: async (
+      _: unknown,
+      args: { id: number },
+      context: ContextAuthentication,
+    ) => {
+      const user = context.user;
+      if (!user) {
+        throw new CustomError(
+          "Acesso não permitido",
+          401,
+          "Sem autorização permitida",
+        );
+      }
+      const userDb: User = await prisma.user.findUnique({
+        where: { id: args.id },
+      });
+      if (!userDb) {
+        throw new CustomError(
+          "Id inválido",
+          400,
+          "O id não consta no banco de dados",
+        );
+      }
+      return userDb;
+    },
   },
   Mutation: {
     createUser: async (
