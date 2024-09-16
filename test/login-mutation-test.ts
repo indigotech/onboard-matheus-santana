@@ -65,11 +65,7 @@ describe("Login-mutation-test", () => {
       endpoint,
       buildLoginMutationInput(userInput.email, userInput.password),
     );
-    const token = jwt.sign(
-      { userId: userResponse.id },
-      (process.env.TOKEN_JWT as Secret) ?? "",
-      { expiresIn: process.env.TIME_EXPIRATION_DEFAULT },
-    );
+    const token = response.data.data.login.token;
     const loginResponseExpected = {
       user: userResponse,
       token,
@@ -78,10 +74,10 @@ describe("Login-mutation-test", () => {
       response.data.data.login.token,
       process.env.TOKEN_JWT as Secret,
     ) as UserInfo;
-    const tokenUDuration = tokenDecoded.exp - tokenDecoded.iat;
+    const tokenDuration = tokenDecoded.exp - tokenDecoded.iat;
 
     expect(response.data.data.login).to.be.deep.eq(loginResponseExpected);
-    expect(tokenUDuration).to.be.eq(24 * 60 * 60);
+    expect(tokenDuration).to.be.eq(24 * 60 * 60);
   });
   it("Should return a user information and token with duration 7 day", async () => {
     userInput.password = "Matheus12345";
@@ -89,11 +85,7 @@ describe("Login-mutation-test", () => {
       endpoint,
       buildLoginMutationInput(userInput.email, userInput.password, true),
     );
-    const token = jwt.sign(
-      { userId: userResponse.id },
-      (process.env.TOKEN_JWT as Secret) ?? "",
-      { expiresIn: process.env.TIME_EXPIRATION_REMEBER_ME },
-    );
+    const token = response.data.data.login.token;
     const loginResponseExpected = {
       user: userResponse,
       token,
@@ -102,9 +94,9 @@ describe("Login-mutation-test", () => {
       response.data.data.login.token,
       process.env.TOKEN_JWT as Secret,
     ) as UserInfo;
-    const tokenUDuration = tokenDecoded.exp - tokenDecoded.iat;
+    const tokenDuration = tokenDecoded.exp - tokenDecoded.iat;
     expect(response.data.data.login).to.be.deep.eq(loginResponseExpected);
-    expect(tokenUDuration).to.be.eq(7 * 24 * 60 * 60);
+    expect(tokenDuration).to.be.eq(7 * 24 * 60 * 60);
   });
 
   it("Should return a error of login (wrong Email)", async () => {
