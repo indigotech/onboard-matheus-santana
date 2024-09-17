@@ -50,6 +50,28 @@ export const resolvers = {
       }
       return userDb;
     },
+    users: async (
+      _: unknown,
+      args: { quantity: number },
+      context: ContextAuthentication,
+    ) => {
+      const user = context.user;
+      if (!user) {
+        throw new CustomError(
+          "Acesso não permitido",
+          401,
+          "Sem autorização permitida",
+        );
+      }
+      const usersReturn = args.quantity ?? 10;
+      const users = await prisma.user.findMany({
+        take: usersReturn,
+        orderBy: {
+          name: "asc",
+        },
+      });
+      return users;
+    },
   },
   Mutation: {
     createUser: async (
