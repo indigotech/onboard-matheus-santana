@@ -6,6 +6,7 @@ import { prisma } from "../src/prisma.js";
 import { User } from "@prisma/client";
 import { genSalt, hash } from "bcrypt";
 import jwt, { Secret } from "jsonwebtoken";
+import { UserInfo } from "../src/server.js";
 
 describe("Login-mutation-test", () => {
   const userInput: UserInput = {
@@ -15,10 +16,15 @@ describe("Login-mutation-test", () => {
     birthDate: "07-12-2003",
   };
 
-  const buildLoginMutationInput = (email: string, password: string) => {
+  const buildLoginMutationInput = (
+    email: string,
+    password: string,
+    rememberMe?: boolean,
+  ) => {
     const loginInput: LoginInput = {
-      email: email,
-      password: password,
+      email,
+      password,
+      rememberMe,
     };
 
     const graphqlMutationLogin = {
@@ -53,28 +59,51 @@ describe("Login-mutation-test", () => {
     });
   });
 
-  it("Should return a user information and token", async () => {
+  it("Should return a user information and token with duration 1 day", async () => {
     userInput.password = "Matheus12345";
     const response = await axios.post(
       endpoint,
       buildLoginMutationInput(userInput.email, userInput.password),
     );
-    const token = jwt.sign(
-      { userId: userResponse.id },
-      process.env.TOKEN_JWT as Secret | "",
-    );
+    const token = response.data.data.login.token;
     const loginResponseExpected = {
       user: userResponse,
-      token: token,
+      token,
     };
+    const tokenDecoded = jwt.verify(
+      response.data.data.login.token,
+      process.env.TOKEN_JWT as Secret,
+    ) as UserInfo;
+    const tokenDuration = tokenDecoded.exp - tokenDecoded.iat;
+
     expect(response.data.data.login).to.be.deep.eq(loginResponseExpected);
+    expect(tokenDuration).to.be.eq(24 * 60 * 60);
+  });
+  it("Should return a user information and token with duration 7 day", async () => {
+    userInput.password = "Matheus12345";
+    const response = await axios.post(
+      endpoint,
+      buildLoginMutationInput(userInput.email, userInput.password, true),
+    );
+    const token = response.data.data.login.token;
+    const loginResponseExpected = {
+      user: userResponse,
+      token,
+    };
+    const tokenDecoded = jwt.verify(
+      response.data.data.login.token,
+      process.env.TOKEN_JWT as Secret,
+    ) as UserInfo;
+    const tokenDuration = tokenDecoded.exp - tokenDecoded.iat;
+    expect(response.data.data.login).to.be.deep.eq(loginResponseExpected);
+    expect(tokenDuration).to.be.eq(7 * 24 * 60 * 60);
   });
 
   it("Should return a error of login (wrong Email)", async () => {
     const wrongEmail = "teste.email.errado@taqtile.com";
     const response = await axios.post(
       endpoint,
-      buildLoginMutationInput(wrongEmail, userInput.password),
+      buildLoginMutationInput(wrongEmail, userInput.password, false),
     );
 
     const loginResponseExpected = {

@@ -4,8 +4,14 @@ import { resolvers } from "./resolvers.js";
 import { typeDefs } from "./types.js";
 import { formatError } from "./erroFormat.js";
 
+export interface UserInfo {
+  userId: number;
+  iat: number;
+  exp: number;
+}
+
 export async function startServer(): Promise<ApolloServer<BaseContext>> {
-  const server = new ApolloServer({
+  const server = new ApolloServer<BaseContext>({
     typeDefs,
     resolvers,
     formatError,

@@ -14,6 +14,7 @@ export interface UserInput {
 export interface LoginInput {
   email: string;
   password: string;
+  rememberMe?: boolean | null;
 }
 
 export const resolvers = {
@@ -48,7 +49,13 @@ export const resolvers = {
         user != null &&
         (await bcrypt.compare(login.password, user.password))
       ) {
-        const token = jwt.sign({ userId: user.id }, process.env.TOKEN_JWT);
+        const timeExpiretion = login.rememberMe
+          ? process.env.TIME_EXPIRATION_REMEBER_ME
+          : process.env.TIME_EXPIRATION_DEFAULT;
+        const token = jwt.sign({ userId: user.id }, process.env.TOKEN_JWT, {
+          expiresIn: timeExpiretion,
+        });
+
         return {
           token: token,
           user: user,
