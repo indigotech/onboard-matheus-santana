@@ -10,7 +10,7 @@
     "test": "dotenv -e test.env -- mocha test/index.ts",
     "dev": "dotenv -e .env -- nodemon",
     "start": "npm run compile && dotenv -e .env -- node dist/index.js",
-    "seed": "tsx seed/seed-database.ts"
+    "seed": "tsx seed/index.ts"
   },
   "author": "Matheus Gonçalves Sant'Ana",
   "license": "ISC",
