@@ -20,6 +20,12 @@ export const typeDefs = `#graphql
     birthDate: String!
   }
 
+  type UserList {
+    users: [User]!
+    previusPage: Int
+    nextPage: Int
+    totalUsers: Int!
+  }
   type Mutation {
     createUser(data: UserInput!) : User
     login(data: LoginInput!) : UserLogin

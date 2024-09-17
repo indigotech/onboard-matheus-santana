@@ -52,18 +52,32 @@ export const resolvers = {
     },
     users: async (
       _: unknown,
-      args: { quantity: number },
+      args: { limit: number; offset: number },
       context: ContextAuthentication,
     ) => {
       authenticationCheck(context.user);
-      const usersReturn = args.quantity ?? 10;
+      const totalUsers = await prisma.user.count();
+      const usersReturn = args.limit ?? 10;
+      const offset = args.offset ?? 0;
+      const previousPage =
+        offset - usersReturn > 0 ? offset - usersReturn : null;
+      const nextPage =
+        offset + usersReturn < totalUsers ? offset + usersReturn : null;
+
       const users = await prisma.user.findMany({
+        skip: offset,
         take: usersReturn,
         orderBy: {
           name: "asc",
         },
       });
-      return users;
+
+      return {
+        users: users,
+        previusPage: previousPage,
+        nextPage: nextPage,
+        totalUsers: totalUsers,
+      };
     },
   },
   Mutation: {
