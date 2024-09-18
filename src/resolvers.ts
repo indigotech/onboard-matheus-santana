@@ -1,5 +1,6 @@
 import { CustomError } from "./error.js";
 import { prisma } from "./prisma.js";
+import { ContextAuthentication } from "./server.js";
 import { checkEmailUnique, checkPasswordValid } from "./utils/validators.js";
 import * as bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -22,7 +23,19 @@ export const resolvers = {
     hello: () => "Hello world!",
   },
   Mutation: {
-    createUser: async (_: unknown, args: { data: UserInput }) => {
+    createUser: async (
+      _: unknown,
+      args: { data: UserInput },
+      context: ContextAuthentication,
+    ) => {
+      const user = context.user;
+      if (!user) {
+        throw new CustomError(
+          "Acesso não permitido",
+          401,
+          "Sem autorização permitida",
+        );
+      }
       const { name, email, birthDate, password }: UserInput = args.data;
       const generatedSalt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(

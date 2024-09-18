@@ -1,9 +1,9 @@
-import { startServer } from "../src/server.js";
-import { ApolloServer, BaseContext } from "@apollo/server";
+import { ContextAuthentication, startServer } from "../src/server.js";
+import { ApolloServer } from "@apollo/server";
 
 export const endpoint = `http://localhost:${process.env.PORT}`;
 
-let serverApollo: ApolloServer<BaseContext>;
+let serverApollo: ApolloServer<ContextAuthentication>;
 
 before(async () => {
   serverApollo = await startServer();
