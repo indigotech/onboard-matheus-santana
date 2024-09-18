@@ -3,33 +3,59 @@ import { compare } from "bcrypt";
 import { expect } from "chai";
 import { endpoint } from "./index.js";
 import { prisma } from "../src/prisma.js";
-import { UserInput } from "../src/resolvers.js";
+import { UserInput } from "../src/types.js";
 import jwt, { Secret } from "jsonwebtoken";
 import { User } from "@prisma/client";
 
 describe("CreateUser-mutation-test", () => {
-  const buildUserInput = async (
-    email: string,
-    password: string,
-  ): Promise<UserInput> => {
+  const buildUserInput = (email: string, password: string) => {
     return {
       birthDate: "07-12-2003",
       email: email,
       name: "Matheus",
       password: password,
+      addresses: [
+        {
+          cep: "13455-200",
+          city: "São Paulo",
+          complement: "lado cidade s'ao paulo",
+          neighborhood: "Bela vista",
+          state: "SP",
+          street: "Av. Paulista",
+          streetNumber: 102,
+        },
+        {
+          cep: "11239-400",
+          city: "Rio de janeior",
+          complement: "",
+          neighborhood: "Vila penteado",
+          state: "RJ",
+          street: "Av. Teste",
+          streetNumber: 105,
+        },
+      ],
     };
   };
 
   const buildCreateUserMutation = (user: UserInput) => {
     return {
       query: `mutation Mutation($data: UserInput!) {
-          createUser(data: $data) {
-            birthDate
-            email
-            name
-            password
+        createUser(data: $data) {
+          birthDate
+          email
+          name
+          password
+          addresses {
+            cep
+            city
+            complement
+            neighborhood
+            state
+            street
+            streetNumber
           }
-        }`,
+        }
+      }`,
       variables: {
         data: user,
       },
@@ -51,16 +77,26 @@ describe("CreateUser-mutation-test", () => {
   let userDb: User;
 
   beforeEach(async () => {
+    const userTmp = buildUserInput(
+      "matheus.12345@taqtile.com.br",
+      "Teste12345",
+    );
     userDb = await prisma.user.create({
-      data: await buildUserInput("matheus.12345@taqtile.com.br", "Teste12345"),
+      data: {
+        name: userTmp.name,
+        email: userTmp.email,
+        password: userTmp.password,
+        birthDate: userTmp.birthDate,
+        addresses: {
+          create: userTmp.addresses,
+        },
+      },
+      include: { addresses: true },
     });
   });
 
   it("Should create a user in data base and return that info", async () => {
-    const user = await buildUserInput(
-      "matheus.54321@hotmail.com",
-      "Teste1235571",
-    );
+    const user = buildUserInput("matheus.54321@hotmail.com", "Teste1235571");
     const token = jwt.sign(
       { userId: userDb.id },
       process.env.TOKEN_JWT as Secret,
@@ -74,10 +110,13 @@ describe("CreateUser-mutation-test", () => {
     expect(
       await compare(user.password, response.data.data.createUser.password),
     ).to.be.eq(true);
+    expect(response.data.data.createUser.addresses).to.be.deep.eq(
+      user.addresses,
+    );
   });
 
   it("Should return a error password invalid", async () => {
-    const user = await buildUserInput("teste.12345@gmail.com", "tes");
+    const user = buildUserInput("teste.12345@gmail.com", "tes");
     const token = jwt.sign(
       { userId: userDb.id },
       process.env.TOKEN_JWT as Secret,
@@ -95,10 +134,7 @@ describe("CreateUser-mutation-test", () => {
   });
 
   it("Should return a error email already exist", async () => {
-    const user = await buildUserInput(
-      "matheus.12345@taqtile.com.br",
-      "12345Test",
-    );
+    const user = buildUserInput("matheus.12345@taqtile.com.br", "12345Test");
     const errorMessage = buildErrorMessage(
       "O email já existe",
       400,
@@ -115,10 +151,7 @@ describe("CreateUser-mutation-test", () => {
     expect(response.data.errors[0]).to.be.deep.eq(errorMessage);
   });
   it("Should return a error unauthorized", async () => {
-    const user = await buildUserInput(
-      "matheus.12345@taqtile.com.br",
-      "12345Test",
-    );
+    const user = buildUserInput("matheus.12345@taqtile.com.br", "12345Test");
     const errorMessage = buildErrorMessage(
       "Acesso não permitido",
       401,
@@ -130,6 +163,7 @@ describe("CreateUser-mutation-test", () => {
   });
 
   afterEach(async () => {
+    await prisma.address.deleteMany();
     await prisma.user.deleteMany();
   });
 });
