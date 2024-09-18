@@ -55,14 +55,7 @@ export const resolvers = {
       args: { quantity: number },
       context: ContextAuthentication,
     ) => {
-      const user = context.user;
-      if (!user) {
-        throw new CustomError(
-          "Acesso não permitido",
-          401,
-          "Sem autorização permitida",
-        );
-      }
+      authenticationCheck(context.user);
       const usersReturn = args.quantity ?? 10;
       const users = await prisma.user.findMany({
         take: usersReturn,

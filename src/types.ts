@@ -2,7 +2,7 @@ export const typeDefs = `#graphql
   type Query {
     hello: String
     user(id: Int!): User
-    users(quantity: Int): [User]
+    users(quantity: Int = 10): [User]
   }
 
   input UserInput{
