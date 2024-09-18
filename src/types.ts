@@ -10,6 +10,7 @@ export const typeDefs = `#graphql
     email: String!
     password: String!
     birthDate: String!
+    addresses: [AddressesInput!]!
   }
 
   type User{
@@ -18,6 +19,29 @@ export const typeDefs = `#graphql
     email: String!
     password : String!
     birthDate: String!
+    addresses: [Addresses]!
+  }
+  
+  type Addresses {
+    id: Int!     
+    cep: String!
+    street: String!
+    streetNumber: Int!
+    complement: String
+    neighborhood: String!
+    city: String!
+    state: String!
+    userId: Int!
+  }
+
+  input AddressesInput {    
+    cep: String!
+    street: String!
+    streetNumber: Int!
+    complement: String
+    neighborhood: String!
+    city: String!
+    state: String!
   }
 
   type UserList {
@@ -42,3 +66,26 @@ export const typeDefs = `#graphql
     token: String!
   }
 `;
+export interface UserInput {
+  name: string;
+  email: string;
+  password: string;
+  birthDate: string;
+  addresses: AddressInput[];
+}
+
+export interface AddressInput {
+  cep: string;
+  street: string;
+  streetNumber?: number;
+  complement: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+}
+
+export interface LoginInput {
+  email: string;
+  password: string;
+  rememberMe?: boolean | null;
+}

@@ -8,9 +8,23 @@ datasource db {
 }
 
 model User {
-  id      Int      @id @default(autoincrement())
-  email   String   @unique
-  name    String?
-  password String
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  name      String?
   birthDate String
+  password  String
+  addresses Address[]
+}
+
+model Address {
+  id           Int     @id @default(autoincrement())
+  cep          String
+  street       String
+  streetNumber Int
+  complement   String?
+  neighborhood String
+  city         String
+  state        String
+  user         User    @relation(fields: [userId], references: [id])
+  userId       Int
 }

@@ -5,19 +5,7 @@ import { ContextAuthentication, UserInfo } from "./server.js";
 import { checkEmailUnique, checkPasswordValid } from "./utils/validators.js";
 import * as bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-
-export interface UserInput {
-  name: string;
-  email: string;
-  password: string;
-  birthDate: string;
-}
-
-export interface LoginInput {
-  email: string;
-  password: string;
-  rememberMe?: boolean | null;
-}
+import { LoginInput, UserInput } from "./types.js";
 
 const authenticationCheck = (user: UserInfo) => {
   if (!user) {
@@ -87,19 +75,25 @@ export const resolvers = {
       context: ContextAuthentication,
     ) => {
       authenticationCheck(context.user);
-      const { name, email, birthDate, password }: UserInput = args.data;
+
+      const { name, email, password, birthDate, addresses }: UserInput =
+        args.data;
       const generatedSalt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(
         checkPasswordValid(password),
         generatedSalt,
       );
-      return prisma.user.create({
+      return await prisma.user.create({
         data: {
           name: name,
           email: await checkEmailUnique(email),
           birthDate: birthDate,
           password: hashedPassword,
+          addresses: {
+            create: addresses,
+          },
         },
+        include: { addresses: true },
       });
     },
     login: async (_: unknown, args: { data: LoginInput }) => {
