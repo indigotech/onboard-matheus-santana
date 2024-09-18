@@ -28,6 +28,7 @@ export const resolvers = {
       authenticationCheck(context.user);
       const userDb: User = await prisma.user.findUnique({
         where: { id: args.id },
+        include: { addresses: true },
       });
       if (!userDb) {
         throw new CustomError(
@@ -58,6 +59,7 @@ export const resolvers = {
         orderBy: {
           name: "asc",
         },
+        include: { addresses: true },
       });
 
       return {
