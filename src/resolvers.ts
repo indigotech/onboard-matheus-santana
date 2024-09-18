@@ -57,7 +57,7 @@ export const resolvers = {
     ) => {
       authenticationCheck(context.user);
       const totalUsers = await prisma.user.count();
-      const usersReturn = args.limit ?? 10;
+      const usersReturn = args.limit > totalUsers ? 50 : (args.limit ?? 10);
       const offset = args.offset ?? 0;
       const previousPage =
         offset - usersReturn > 0 ? offset - usersReturn : null;
@@ -74,7 +74,7 @@ export const resolvers = {
 
       return {
         users: users,
-        previusPage: previousPage,
+        previousPage: previousPage >= totalUsers ? 0 : previousPage,
         nextPage: nextPage,
         totalUsers: totalUsers,
       };
