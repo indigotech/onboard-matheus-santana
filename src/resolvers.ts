@@ -50,6 +50,21 @@ export const resolvers = {
       }
       return userDb;
     },
+    users: async (
+      _: unknown,
+      args: { quantity: number },
+      context: ContextAuthentication,
+    ) => {
+      authenticationCheck(context.user);
+      const usersReturn = args.quantity ?? 10;
+      const users = await prisma.user.findMany({
+        take: usersReturn,
+        orderBy: {
+          name: "asc",
+        },
+      });
+      return users;
+    },
   },
   Mutation: {
     createUser: async (
