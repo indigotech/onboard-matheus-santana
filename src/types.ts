@@ -2,7 +2,7 @@ export const typeDefs = `#graphql
   type Query {
     hello: String
     user(id: Int!): User
-    users(quantity: Int = 10): [User]
+    users(limit: Int = 10, offset: Int = 0): UserList
   }
 
   input UserInput{
@@ -20,6 +20,12 @@ export const typeDefs = `#graphql
     birthDate: String!
   }
 
+  type UserList {
+    users: [User]!
+    previousPage: Int
+    nextPage: Int
+    totalUsers: Int!
+  }
   type Mutation {
     createUser(data: UserInput!) : User
     login(data: LoginInput!) : UserLogin
