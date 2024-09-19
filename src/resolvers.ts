@@ -1,6 +1,7 @@
+import { User } from "@prisma/client";
 import { CustomError } from "./error.js";
 import { prisma } from "./prisma.js";
-import { ContextAuthentication } from "./server.js";
+import { ContextAuthentication, UserInfo } from "./server.js";
 import { checkEmailUnique, checkPasswordValid } from "./utils/validators.js";
 import * as bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -18,9 +19,37 @@ export interface LoginInput {
   rememberMe?: boolean | null;
 }
 
+const authenticationCheck = (user: UserInfo) => {
+  if (!user) {
+    throw new CustomError(
+      "Acesso não permitido",
+      401,
+      "Sem autorização permitida",
+    );
+  }
+};
+
 export const resolvers = {
   Query: {
     hello: () => "Hello world!",
+    user: async (
+      _: unknown,
+      args: { id: number },
+      context: ContextAuthentication,
+    ) => {
+      authenticationCheck(context.user);
+      const userDb: User = await prisma.user.findUnique({
+        where: { id: args.id },
+      });
+      if (!userDb) {
+        throw new CustomError(
+          "Id inválido",
+          400,
+          "O id não consta no banco de dados",
+        );
+      }
+      return userDb;
+    },
   },
   Mutation: {
     createUser: async (
@@ -28,14 +57,7 @@ export const resolvers = {
       args: { data: UserInput },
       context: ContextAuthentication,
     ) => {
-      const user = context.user;
-      if (!user) {
-        throw new CustomError(
-          "Acesso não permitido",
-          401,
-          "Sem autorização permitida",
-        );
-      }
+      authenticationCheck(context.user);
       const { name, email, birthDate, password }: UserInput = args.data;
       const generatedSalt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(

@@ -1,6 +1,7 @@
 export const typeDefs = `#graphql
   type Query {
     hello: String
+    user(id: Int!): User
   }
 
   input UserInput{

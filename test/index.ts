@@ -12,6 +12,7 @@ before(async () => {
 import "./hello-graphql-test.js";
 import "./createUser-test.js";
 import "./login-mutation-test.js";
+import "./getUser-test.js";
 
 after(async () => {
   await serverApollo.stop();
