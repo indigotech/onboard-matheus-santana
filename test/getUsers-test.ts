@@ -5,7 +5,7 @@ import jwt, { Secret } from "jsonwebtoken";
 import { expect } from "chai";
 import { seedDatabase } from "../seed/seed-database";
 import seedJson from "../seed/user-seed.json";
-import { UserInput } from "../src/resolvers";
+import { UserInput } from "../src/types.js";
 
 const generateUsers = (offset: number, limit: number) => {
   const seedUsers: UserInput[] = [];

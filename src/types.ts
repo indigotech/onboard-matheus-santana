@@ -77,8 +77,8 @@ export interface UserInput {
 export interface AddressInput {
   cep: string;
   street: string;
-  streetNumber?: number;
-  complement: string;
+  streetNumber: number;
+  complement?: string;
   neighborhood: string;
   city: string;
   state: string;

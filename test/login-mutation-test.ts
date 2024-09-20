@@ -1,7 +1,7 @@
 import axios from "axios";
 import { expect } from "chai";
 import { endpoint } from "./index.js";
-import { LoginInput, UserInput } from "../src/resolvers.js";
+import { LoginInput } from "../src/types.js";
 import { prisma } from "../src/prisma.js";
 import { User } from "@prisma/client";
 import { genSalt, hash } from "bcrypt";
@@ -9,7 +9,7 @@ import jwt, { Secret } from "jsonwebtoken";
 import { UserInfo } from "../src/server.js";
 
 describe("Login-mutation-test", () => {
-  const userInput: UserInput = {
+  const userInput = {
     name: "Matheus Gonçalves",
     email: "matheus.12345@taqtile.com",
     password: "Matheus12345",
@@ -51,7 +51,7 @@ describe("Login-mutation-test", () => {
   let userResponse: User;
 
   beforeEach(async () => {
-    const generatedSalt = await genSalt(10);
+    const generatedSalt = await genSalt(1);
     const hashedPassword = await hash(userInput.password, generatedSalt);
     userInput.password = hashedPassword;
     userResponse = await prisma.user.create({
